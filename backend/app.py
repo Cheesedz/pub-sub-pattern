@@ -15,7 +15,14 @@ import uuid
 import logging
 from typing import List
 import numpy as np
-from supabase import create_client, Client
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='hello')
+channel.basic_publish(exchange='',
+                      routing_key='hello',
+                      body='Hello World!')
 
 UPLOAD_FOLDER = 'uploads'
 STATIC_FOLDER = 'static/results'
@@ -31,10 +38,6 @@ if not isdir:
 origins = ["*"]
 
 load_dotenv()
-
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=STATIC_FOLDER), name="static")

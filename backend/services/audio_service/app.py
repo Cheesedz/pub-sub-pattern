@@ -3,8 +3,20 @@ import uvicorn
 import json
 from fastapi import FastAPI, Request, HTTPException
 from YoutubeLoader import download_audio_from_youtube
-
 from Transcript import transcribe_audio
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='hello')
+
+def callback(ch, method, properties, body):
+    print(f" [x] Received {body}")
+
+channel.basic_consume(queue='hello',
+                      auto_ack=True,
+                      on_message_callback=callback)
+channel.start_consuming()
 
 app = FastAPI()
 
