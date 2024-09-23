@@ -1,0 +1,12 @@
+celery==5.4.0
+fastapi
+opencv-python
+aiofiles
+python-multipart
+pyyaml
+uvicorn
+redis
+supabase
+python-dotenv
+yt-dlp
+deepgram-sdk==2.12.0
