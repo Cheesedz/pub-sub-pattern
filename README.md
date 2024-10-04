@@ -26,7 +26,10 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-ma
 ```bash
 cd backend
 uvicorn app:app --reload
-
-cd services/audio_service
-uvicorn app:app --reload --port 8081
 ```
+- Run Celery worker
+```bash
+cd backend
+celery -A celery_tasks.tasks worker --loglevel=INFO
+```
+
