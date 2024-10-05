@@ -1,27 +1,22 @@
 import pika
-from utils import custom_json_serializer
-import json
 
 def get_connection():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    """Establish a RabbitMQ connection."""
+    return pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+
+def get_channel():
+    connection = get_connection()
     channel = connection.channel()
 
-    channel.exchange_declare(
+    # Declare exchanges
+    channel.exchange_declare(exchange='topic_exchange', exchange_type='topic', durable=True)
+
+    # Declare queue and bind it to the topic exchange
+    channel.queue_declare(queue='package_queue', durable=True)
+    channel.queue_bind(
         exchange='topic_exchange', 
-        exchange_type='topic'
+        queue='package_queue', 
+        routing_key='package.*'
     )
-    channel.exchange_declare(
-        exchange='fanout_exchange', 
-        exchange_type='fanout'
-    )
-    channel.exchange_bind(
-        destination='fanout_exchange', 
-        source='topic_exchange', 
-        routing_key='topic_fanout'
-    )
-    channel.queue_declare(
-        queue='generic', 
-        exclusive=False, 
-        durable=True
-    )
-    return channel
+
+    return connection, channel

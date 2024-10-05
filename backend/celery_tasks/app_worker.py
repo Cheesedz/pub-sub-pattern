@@ -1,4 +1,3 @@
-import os
 from celery import Celery
 
 BROKER_URI = 'pyamqp://'
@@ -11,9 +10,10 @@ app = Celery(
     include=['celery_tasks.tasks']
 )
 
+# Task Routing with Custom Queues and Routing Keys
 app.conf.task_routes = {
-    'tasks.package_consumer': {
+    'celery_tasks.tasks.package_consumer': {
         'queue': 'package_queue',
-        'routing_key': 'package.*'
+        'routing_key': 'package.*'  # This matches your RabbitMQ routing
     }
 }

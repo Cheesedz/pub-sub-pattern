@@ -3,27 +3,27 @@ from typing import Optional, List
 from datetime import datetime
 
 class Customer(BaseModel):
-    customer_id: int
+    customer_id: str | int
     customer_name: str
     address: str
     email: Optional[str] = None
     phone: Optional[str] = None
 
 class Product(BaseModel):
-    product_id: int
+    product_id: str | int
     product_name: str
     price: float
     description: Optional[str] = None
     stock_quantity: int
 
 class OrderItem(BaseModel):
-    item_id: int
+    item_id: str | int
     product: Product
     quantity: int
     total_price: float
 
 class Order(BaseModel):
-    order_id: int
+    order_id: str | int
     order_date: datetime
     customer: Customer
     items: List[OrderItem]
@@ -31,7 +31,7 @@ class Order(BaseModel):
     status: str
 
 class Payment(BaseModel):
-    payment_id: int
+    payment_id: str | int
     order: Order
     payment_date: datetime
     amount_paid: float
@@ -39,8 +39,8 @@ class Payment(BaseModel):
     payment_status: str
 
 class Package(BaseModel):
-    package_id: int
-    order_id: int  
+    package_id: str | int
+    order_id: str | int  
     weight: float 
     dimensions: str  
     packaging_type: str 
@@ -51,7 +51,7 @@ class Package(BaseModel):
     courier_service: Optional[str] = None  
 
 class DeliveryService(BaseModel):
-    delivery_service_id: int
+    delivery_service_id: str | int
     name: str 
     contact_number: str
     email: Optional[str] = None
@@ -59,7 +59,7 @@ class DeliveryService(BaseModel):
     support_hours: Optional[str] = None 
 
 class Delivery(BaseModel):
-    delivery_id: int
+    delivery_id: str | int
     package: Package  
     delivery_service: DeliveryService  
     status: str 

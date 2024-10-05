@@ -1,4 +1,6 @@
-from client import channel
+from client import get_channel
+
+connection, channel = get_channel()
 
 channel.exchange_declare(exchange='topic_exchange', exchange_type='topic')
 channel.exchange_declare(exchange='fanout_exchange', exchange_type='fanout')
