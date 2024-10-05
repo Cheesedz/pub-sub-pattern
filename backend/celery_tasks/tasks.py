@@ -1,10 +1,13 @@
-import logging, json
+import logging, json, requests, os
+from os.path import join, dirname
+from dotenv import load_dotenv
 from models.model import Package, Payment
 from celery_tasks.app_worker import app
 from celery import shared_task
 from celery.exceptions import MaxRetriesExceededError
 from services.package_service import PackageService
 
+load_dotenv()
 # Initialize the service once outside the task
 package_service = PackageService()
 
@@ -17,9 +20,12 @@ def package_consumer(self, data):
 
         package_data = Payment(**data)
         logging.info(f"[Package Data] Data: {package_data}")
-        result = package_service.package(package_data)
+        result = requests.post(
+            url=f"{os.environ.get('PACKAGE_SERVICE_URL')}/api/package",
+            json=data
+        )
 
-        return {'status': 'SUCCESS', 'result': result.dict()}
+        return {'status': 'SUCCESS', 'result': result.request.body}
     
     except json.JSONDecodeError as json_error:
         logging.error(f"Failed to decode JSON: {json_error}")

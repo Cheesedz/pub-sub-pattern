@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from backend.models.model import Payment
 from rabbitmq.client import get_connection, get_channel
-from celery_tasks.tasks import package_consumer
-import json
-import uuid
-import pika
+from celery_tasks.tasks import package_consumer, app
+from celery.result import AsyncResult
+import json, uuid, pika, logging
 from utils import custom_json_serializer
 
 router = APIRouter()
@@ -47,3 +46,8 @@ async def paid(body: Payment):
         # Ensure the connection is closed after publishing
         if connection:
             connection.close()
+
+@router.post("/listen")
+async def get_task_status(data: dict):
+    logging.info(f"WebHook: {data}")
+    return data
