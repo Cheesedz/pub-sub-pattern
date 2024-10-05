@@ -30,6 +30,6 @@ uvicorn app:app --reload
 - Run Celery worker
 ```bash
 cd backend
-celery -A celery_tasks.tasks worker --loglevel=INFO
+celery -A celery_tasks.tasks worker --loglevel=info --queues=package_queue
 ```
 
