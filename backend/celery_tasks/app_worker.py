@@ -15,5 +15,9 @@ app.conf.task_routes = {
     'celery_tasks.tasks.package_consumer': {
         'queue': 'package_queue',
         'routing_key': 'package.*'  # This matches your RabbitMQ routing
+    },
+        'celery_tasks.tasks.delivery_consumer': {
+        'queue': 'delivery_queue',
+        'routing_key': 'delivery.*' 
     }
 }

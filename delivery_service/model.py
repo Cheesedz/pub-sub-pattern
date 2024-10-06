@@ -52,7 +52,7 @@ class Package(BaseModel):
 
 class Delivery(BaseModel):
     delivery_id: str | int
-    package: Package  
+    package: Package   
     status: str 
     pickup_date: datetime
     delivery_date: Optional[datetime] = None 

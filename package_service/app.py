@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os, requests, json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from model import Package, Payment
+from model import Package, Delivery, Payment
 import logging, uuid, random
 from utils import custom_json_serializer
 from datetime import datetime, timedelta
@@ -39,7 +39,7 @@ async def createPackge(data: Payment):
         courier_service="DHL"  
     )
 
-    logging.info(f"Package created: {package}")
+    logging.info(f"Delivery created: {package}")
 
     webHookCallback(package)
     return package
