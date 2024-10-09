@@ -41,5 +41,7 @@ uvicorn app:app --reload --port 8081
 ```bash
 cd backend
 celery -A celery_tasks.tasks worker --loglevel=info --queues=package_queue
+celery -A celery_tasks.tasks worker --loglevel=info --queues=delivery_queue
+celery -A celery_tasks.tasks worker --loglevel=info --queues=mail_queue
 ```
 
