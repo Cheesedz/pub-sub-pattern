@@ -33,15 +33,20 @@ async def process_webhook(data: dict):
     logging.info(f"WebHook: {data}")
     try:
         match data['topic']:
-            case 'package':
+            case 'delivery':
                 publish(
                     body=data,
                     exchange='topic_exchange',
                     routing_key='delivery.created',
                     consumer='delivery_consumer'
                 )
-            case 'delivery':
-                pass
+            case 'notification':
+                publish(
+                    body=data,
+                    exchange='fanout_exchange',
+                    routing_key='notification.mail',
+                    consumer='mail_noti_consumer'
+                )
 
         return {"status": "Message Published"}
 

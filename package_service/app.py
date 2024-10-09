@@ -49,7 +49,7 @@ def webHookCallback(data: Package):
         url=f"{os.environ.get('BACKEND_URL')}/api/listen",
         json={
             "data": json.dumps(data.model_dump(), default=custom_json_serializer),
-            "topic": "package",
+            "topic": "delivery",
             "status": "done"
         }
     )

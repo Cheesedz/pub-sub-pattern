@@ -74,3 +74,26 @@ def delivery_consumer(self, data):
             logging.error(f"Max retries exceeded for task {self.request.id}")
             return {'status': 'FAIL', 'result': 'Max retries achieved'}
 
+@app.task(bind=True, retry=5, default_retry_delay=60)
+def mail_noti_consumer(self, data):
+    try:
+        message = "This message sent via mail"
+        # Deserialize data if it's a JSON string
+        result = requests.post(
+            url=f"{os.environ.get('NOTIFICATION_SERVICE_URL')}/api/mail_send",
+            json=message
+        )
+
+        return {'status': 'SUCCESS', 'result': result.request.body}
+    
+    except json.JSONDecodeError as json_error:
+        logging.error(f"Failed to decode JSON: {json_error}")
+        return {'status': 'FAIL', 'result': 'Invalid JSON format'}
+
+    except Exception as ex:
+        logging.error(f"Exception in task: {ex}")
+        try:
+            self.retry(countdown=2, exc=ex)
+        except MaxRetriesExceededError:
+            logging.error(f"Max retries exceeded for task {self.request.id}")
+            return {'status': 'FAIL', 'result': 'Max retries achieved'}

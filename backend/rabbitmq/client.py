@@ -11,6 +11,7 @@ def get_channel():
 
     # Declare exchanges
     channel.exchange_declare(exchange='topic_exchange', exchange_type='topic', durable=True)
+    channel.exchange_declare(exchange='fanout_exchange', exchange_type='fanout', durable=True)
 
     # Declare queue and bind it to the topic exchange
     channel.queue_declare(queue='package_queue', durable=True)
@@ -27,9 +28,24 @@ def get_channel():
         routing_key='delivery.*'
     )
 
+    channel.queue_declare(queue='mail_queue', durable=True)
+    channel.queue_bind(
+        exchange='fanout_exchange', 
+        queue='mail_queue', 
+        routing_key='notification.*'
+    )
+
+    channel.queue_declare(queue='mail_queue_2', durable=True)
+    channel.queue_bind(
+        exchange='fanout_exchange', 
+        queue='mail_queue_2', 
+        routing_key='notification.*'
+    )
+    
+
     return connection, channel
 
-def publish(body: dict, exchange: str, routing_key: str, consumer: str):
+def publish(body: dict, exchange: str, routing_key: str | list[str], consumer: str):
     # Get channel and connection
     connection, channel = get_channel()
     
@@ -38,17 +54,31 @@ def publish(body: dict, exchange: str, routing_key: str, consumer: str):
         "kwargs": {}
     }
 
+    if isinstance(routing_key, list):
+        for key in routing_key:
+            channel.basic_publish(
+            exchange=exchange,  # Publish to your desired exchange
+            routing_key=key,      # Routing key for the queue
+            body=json.dumps(message_with_celery_body),
+            properties=pika.BasicProperties(
+                delivery_mode=2,
+                headers={'id': str(uuid.uuid4()), 'task': f'celery_tasks.tasks.{consumer}'},
+                content_type='application/json'
+            )  # Make message persistent
+        )
+    
+    else:
     # Publish the message
-    channel.basic_publish(
-        exchange=exchange,  # Publish to your desired exchange
-        routing_key=routing_key,      # Routing key for the queue
-        body=json.dumps(message_with_celery_body),
-        properties=pika.BasicProperties(
-            delivery_mode=2,
-            headers={'id': str(uuid.uuid4()), 'task': f'celery_tasks.tasks.{consumer}'},
-            content_type='application/json'
-        )  # Make message persistent
-    )
+        channel.basic_publish(
+            exchange=exchange,  # Publish to your desired exchange
+            routing_key=routing_key,      # Routing key for the queue
+            body=json.dumps(message_with_celery_body),
+            properties=pika.BasicProperties(
+                delivery_mode=2,
+                headers={'id': str(uuid.uuid4()), 'task': f'celery_tasks.tasks.{consumer}'},
+                content_type='application/json'
+            )  # Make message persistent
+        )
 
     if connection:
         connection.close()
