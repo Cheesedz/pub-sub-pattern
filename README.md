@@ -94,6 +94,25 @@ When implementing the PubSub pattern, consider the following points:
 12. **Scaling Out Subscribers**
     - If a subscriber cannot handle the rate of incoming messages, apply the **Competing Consumers Pattern** to scale out by adding more subscriber instances to process messages concurrently.
 
+## Disadvantages
+
+PubSub also has several disadvantages:
+
+1. **Complexity**
+   - Additional infrastructure, such as message brokers, adds complexity to the system, requiring maintenance and monitoring.
+
+2. **Latency**
+   - Asynchronous delivery might introduce delays, especially under heavy load.
+
+3. **Debugging**
+   - Troubleshooting distributed systems with PubSub can be challenging because of the decoupled nature and asynchronous communication.
+
+4. **Message Ordering**
+   - Messages may not always be processed in the order they are sent, which can lead to inconsistent states if not handled properly.
+
+5. **Failure Handling**
+   - If subscribers or brokers fail, messages might be lost unless specific mechanisms like dead-letter queues are implemented.
+   - 
 ## When to Use This Pattern
 
 The PubSub pattern is suitable in the following scenarios:
