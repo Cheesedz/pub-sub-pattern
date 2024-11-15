@@ -1,39 +1,128 @@
-# Pub/Sub pattern
-Demo project for Software Architecture course
+# PubSub (Publisher-Subscriber) Pattern
 
-## Context & problem
-- Asynchronous messaging decouples senders from consumers and avoids blocking.
-- Dedicated message queues for each consumer do not scale well.
-- Consumers may be interested in only a subset of information.
-- The publish-subscribe model allows senders to broadcast events without knowing consumer identities.
-- Consumers subscribe to receive relevant events, enabling efficient scaling.
+## Context and Problem
 
-## Pub/Sub & its benefits
-- **Publish-Subscribe (Pub/Sub) Model**: A messaging pattern where senders (publishers) broadcast messages without needing to know who the receivers (subscribers) are.
-- **Topics**: Publishers send messages to topics, which act as channels for communication.
-- **Subscribers**: Consumers subscribe to topics to receive messages that match their interests.
-- **Decoupling**: Publishers and subscribers are loosely coupled, allowing them to operate independently.
-- **Scalability**: Enables efficient communication with multiple consumers without direct connections.
-- **Filtering**: Subscribers receive only the messages relevant to the topics they are subscribed to.
+The Publisher-Subscriber (PubSub) pattern is a messaging pattern that enables communication between multiple components in a system by decoupling the message producers (publishers) from the message consumers (subscribers). This pattern is particularly useful in scenarios where:
 
-## Issues & considerations
-When using the **Pub/Sub** model, there are several issues and drawbacks to consider:
+- Components need to communicate dynamically without tight coupling.
+- The system must support asynchronous, scalable, and extensible communication.
+- Multiple components may need to react to the same event.
 
-1. **Message Ordering**: Ensuring message delivery in the correct order across multiple subscribers can be challenging.
-   
-2. **Delivery Guarantees**: Messages may be delivered more than once (duplicate messages) or not at all, depending on the implementation.
+### Typical Problem
 
-3. **Latency**: There can be a delay in message delivery to subscribers, especially in large distributed systems.
+In a tightly coupled system:
 
-4. **Overhead in Filtering**: Subscribers may receive irrelevant messages if filtering is not fine-grained, leading to wasted processing.
+- **Scaling Challenges**: As more components are added, direct communication leads to increased complexity and dependency.
+- **Flexibility Issues**: Adding new components or modifying existing ones requires changes to other components.
+- **Reduced Fault Tolerance**: Failures in one component can directly impact others.
 
-5. **Complexity in Scaling**: Scaling across multiple regions or data centers can introduce complexity, such as data consistency and message loss.
+For example, in an e-commerce application:
 
-6. **Subscriber Failures**: Handling slow or failed subscribers can complicate the system, as messages may need to be retried or buffered.
+- A new order is placed (publisher event).
+- Multiple services (subscribers) need to react: inventory management, email notifications, analytics, etc.
 
-7. **Lack of Direct Response**: Since Pub/Sub is asynchronous, the sender does not receive immediate feedback on the message status or response from subscribers.
+Hardcoding these interactions introduces complexity, dependencies, and scalability issues.
 
-8. **Resource Consumption**: High throughput systems can consume significant computational resources for maintaining the message broker infrastructure.
+## Benefits
+
+PubSub messaging has the following benefits:
+
+1. **Decoupling Subsystems**
+   - Subsystems that need to communicate can be managed independently. Messages are properly managed even if one or more receivers are offline.
+
+2. **Scalability and Responsiveness**
+   - The sender can quickly send a single message to the input channel and return to its core processing responsibilities, improving scalability and responsiveness. The messaging infrastructure ensures messages are delivered to subscribers.
+
+3. **Improved Reliability**
+   - Asynchronous messaging enables applications to continue running smoothly under increased loads and handle intermittent failures more effectively.
+
+4. **Deferred or Scheduled Processing**
+   - Subscribers can delay processing messages until off-peak hours, or messages can be routed or processed according to a specific schedule.
+
+5. **Simpler Integration**
+   - Facilitates integration between systems using different platforms, programming languages, or communication protocols, as well as between on-premises systems and cloud applications.
+
+6. **Asynchronous Workflows**
+   - Supports asynchronous workflows across an enterprise, improving overall system flexibility and efficiency.
+
+7. **Improved Testability**
+   - Channels can be monitored, and messages can be inspected or logged as part of an overall integration test strategy.
+
+8. **Separation of Concerns**
+   - Each application can focus on its core capabilities, while the messaging infrastructure handles everything required to reliably route messages to multiple consumers.
+
+## Issues and Considerations
+
+When implementing the PubSub pattern, consider the following points:
+
+1. **Existing Technologies**
+   - Use existing messaging products and services that support the PubSub model rather than building your own. For example, Azure Service Bus, Event Hubs, Event Grid, Redis, RabbitMQ, and Apache Kafka are widely used technologies for PubSub messaging.
+
+2. **Subscription Handling**
+   - Ensure the messaging infrastructure provides mechanisms for consumers to subscribe to or unsubscribe from available channels easily.
+
+3. **Security**
+   - Restrict access to message channels using strict security policies to prevent unauthorized access and potential eavesdropping.
+
+4. **Subsets of Messages**
+   - Subscribers often need only specific subsets of messages distributed by a publisher. This can be implemented through:
+     - **Topics**: Each topic has a dedicated output channel, allowing consumers to subscribe to specific topics of interest.
+     - **Content Filtering**: Inspect messages and distribute them based on content. Subscribers can specify the content they want to receive.
+     - **Wildcard Subscribers**: Allow subscribers to use wildcards to subscribe to multiple topics simultaneously.
+
+5. **Bi-directional Communication**
+   - In PubSub, channels are unidirectional. If subscribers need to communicate back to publishers, consider using the **Request/Reply Pattern**, which uses separate channels for sending messages and receiving replies.
+
+6. **Message Ordering**
+   - The order in which subscribers receive messages isn't guaranteed and might not reflect the order of message creation. Design the system to ensure message processing is idempotent, eliminating dependencies on message order.
+
+7. **Message Priority**
+   - For scenarios where specific messages must be processed first, implement the **Priority Queue Pattern**, ensuring high-priority messages are delivered and processed before others.
+
+8. **Poison Messages**
+   - Malformed messages or tasks requiring unavailable resources can cause failures. Use dead-letter queues to capture and store details of these messages for later analysis instead of returning them to the queue.
+
+9. **Repeated Messages**
+   - Messages might be sent more than once due to failures or retries. Implement duplicate message detection (de-duplication) using unique message IDs or ensure the message processing logic is idempotent.
+
+10. **Message Expiration**
+    - Some messages have a limited lifetime. Include expiration times in messages and discard expired ones during processing.
+
+11. **Message Scheduling**
+    - Temporarily embargo messages until a specified date or time, ensuring they are not processed prematurely.
+
+12. **Scaling Out Subscribers**
+    - If a subscriber cannot handle the rate of incoming messages, apply the **Competing Consumers Pattern** to scale out by adding more subscriber instances to process messages concurrently.
+
+## When to Use This Pattern
+
+The PubSub pattern is suitable in the following scenarios:
+
+- **Event-Driven Systems**: Systems where components react to events, such as user actions, system state changes, or external inputs.
+- **Scalable Applications**: Applications that need to handle multiple producers and consumers with minimal latency.
+- **Asynchronous Communication**: Environments where components cannot afford to wait for responses from other components.
+- **Extensible Architectures**: Systems where new features or services are added frequently without disrupting existing ones.
+
+### Examples
+
+1. **E-commerce Application**
+   - **Publisher**: Order Service publishes an "Order Placed" event.
+   - **Subscribers**:
+     - Inventory Service updates stock.
+     - Notification Service sends an order confirmation email.
+     - Analytics Service logs the order for insights.
+
+2. **IoT System**
+   - **Publisher**: Temperature sensors publish data periodically.
+   - **Subscribers**:
+     - Dashboard Service updates live graphs.
+     - Alert Service sends notifications if thresholds are exceeded.
+
+3. **Microservices Architecture**
+   - **Publisher**: User Service publishes "User Registered" events.
+   - **Subscribers**:
+     - Welcome Email Service sends a welcome message.
+     - Rewards Service credits initial rewards to the user account.
 
 # Demo guideline
 ## Requirements
